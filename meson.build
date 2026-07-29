@@ -11,7 +11,7 @@ project('libsigc++', 'cpp',
 )
 
 sigcxx_api_version = '2.0'
-sigcxx_pcname = 'sigc++-' + sigcxx_api_version
+sigcxx_pcname = 'sigc++-@0@'.format(sigcxx_api_version)
 
 sigcxx_version_array = meson.project_version().split('.')
 sigcxx_major_version = sigcxx_version_array[0].to_int()
@@ -42,6 +42,21 @@ is_msvc = cpp_compiler.get_id() == 'msvc'
 
 # Use the Python installation that Meson uses. Its version is >= 3.7.
 python3 = import('python').find_installation()
+pkgconfig = import('pkgconfig')
+common_pkgconfig_vars = [
+  'htmlrefpub=https://libsigcplusplus.github.io/libsigcplusplus/reference/html/',
+]
+base_pkgconfig_vars = [
+  'exec_prefix=${prefix}',
+  'datarootdir=${prefix}/share',
+  'datadir=${datarootdir}',
+  'docdir=${datarootdir}/doc/@0@'.format(sigcxx_pcname),
+  'doxytagfile=${docdir}/reference/@0@.tag'.format(sigcxx_pcname),
+  'htmlrefdir=${docdir}/reference/html',
+] + common_pkgconfig_vars
+base_pkgconfig_uninstalled_vars = [
+  'doxytagfile=${prefix}/docs/reference/@0@.tag'.format(sigcxx_pcname),
+] + common_pkgconfig_vars
 
 # MSVC: We currently do not support shared and static builds at the,
 #       same time, since we need different defines/cflags for proper
@@ -230,13 +245,6 @@ endif
 
 # Configure files
 pkg_conf_data = configuration_data()
-pkg_conf_data.set('prefix', install_prefix)
-pkg_conf_data.set('exec_prefix', '${prefix}')
-pkg_conf_data.set('libdir', '${exec_prefix}' / install_libdir)
-pkg_conf_data.set('datarootdir', '${prefix}' / install_datadir)
-pkg_conf_data.set('datadir', '${datarootdir}')
-pkg_conf_data.set('includedir', '${prefix}' / install_includedir)
-pkg_conf_data.set('top_srcdir', project_source_root)
 pkg_conf_data.set('PACKAGE_VERSION', meson.project_version())
 pkg_conf_data.set('SIGCXX_API_VERSION', sigcxx_api_version)
 
@@ -254,23 +262,6 @@ foreach conf_test : ['gcc_template_specialization_operator_overload',
     pkg_conf_data.set('SIGC_' + conf_test.to_upper(), true)
   endif
 endforeach
-pkg_conf_data.set('MSVC_STATIC_CXXFLAG', is_msvc_static ? static_cxxflag : '')
-
-configure_file(
-  input: 'sigc++.pc.in',
-  output: sigcxx_pcname + '.pc',
-  configuration: pkg_conf_data,
-  install: true,
-  install_dir: install_pkgconfigdir,
-  install_tag: 'devel',
-)
-
-configure_file(
-  input: 'sigc++-uninstalled.pc.in',
-  output: sigcxx_pcname + '-uninstalled.pc',
-  configuration: pkg_conf_data,
-  install: false,
-)
 
 sigcxxconfig_h_meson = files('sigc++config.h.meson')
 install_includeconfigdir = install_libdir / sigcxx_pcname / 'include'

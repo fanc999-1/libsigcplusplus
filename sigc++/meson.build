@@ -2,7 +2,9 @@
 
 # Input: sigcxx_build_dep, sigcxx_pcname, sigcxx_libversion, sigcxx_api_version,
 #        install_includedir, project_source_root, sigc_res, python3,
-#        handle_built_files, maintainer_mode
+#        handle_built_files, maintainer_mode, pkgconfig,
+#        base_pkgconfig_vars, base_pkgconfig_uninstalled_vars, is_msvc_static,
+#        static_cxxflag
 # Output: source_h_files, built_h_files, sigcxx_own_dep, built_files_root,
 #         built_h_file_targets
 
@@ -167,6 +169,24 @@ else # not maintainer_mode
   built_h_cc_dir = src_untracked_sigcxx
 
 endif
+
+pkg_config_extra_cflags = ['-I${libdir}/@0@/include'.format(sigcxx_pcname)]
+if is_msvc_static
+  pkg_config_extra_cflags += static_cxxflag
+endif
+
+# Generate the pkg-config files
+pkgconfig.generate(
+  sigcxx_library,
+  name: 'libsigc++',
+  description: 'Typesafe signal and callback system for C++',
+  filebase: sigcxx_pcname,
+  subdirs: sigcxx_pcname,
+  url: 'https://libsigcplusplus.github.io/libsigcplusplus/',
+  extra_cflags: pkg_config_extra_cflags,
+  variables: base_pkgconfig_vars,
+  uninstalled_variables: base_pkgconfig_uninstalled_vars
+)
 
 # Install built .h files.
 meson.add_install_script(
