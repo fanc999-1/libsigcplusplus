@@ -50,12 +50,12 @@ base_pkgconfig_vars = [
   'exec_prefix=${prefix}',
   'datarootdir=${prefix}/share',
   'datadir=${datarootdir}',
-  'docdir=${datarootdir}/doc/@0@'.format(sigcxx_pcname),
-  'doxytagfile=${docdir}/reference/@0@.tag'.format(sigcxx_pcname),
+  'docdir=${datarootdir}/doc/lib@0@'.format(sigcxx_pcname),
+  'doxytagfile=${docdir}/reference/lib@0@.tag'.format(sigcxx_pcname),
   'htmlrefdir=${docdir}/reference/html',
 ] + common_pkgconfig_vars
 base_pkgconfig_uninstalled_vars = [
-  'doxytagfile=${prefix}/docs/reference/@0@.tag'.format(sigcxx_pcname),
+  'doxytagfile=${prefix}/docs/reference/lib@0@.tag'.format(sigcxx_pcname),
 ] + common_pkgconfig_vars
 
 # MSVC: We currently do not support shared and static builds at the,
